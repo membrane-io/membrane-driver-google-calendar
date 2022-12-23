@@ -1,0 +1,11 @@
+{
+  "name": "googlecalendar",
+  "version": "0.0.1",
+  "description": "Google Calendar driver for Membrane",
+  "author": "Juan Campa <juancampa@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "client-oauth2": "git+https://github.com/juancampa/js-client-oauth2.git"
+  }
+}

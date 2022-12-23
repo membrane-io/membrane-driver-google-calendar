@@ -1,0 +1,635 @@
+{
+  "dependencies": {
+    "clock": "sys-clock:",
+    "http": "http:",
+    "endpoint": "sys-process:endpointUrl"
+  },
+  "expressions": {
+    "eventUrl": {
+      "description": "Calendar Event",
+      "type": "text",
+      "searchIn": "https://calendar.google.com",
+      "regex": "data-eventid=\"[^\"]+\""
+    }
+  },
+  "schema": {
+    "types": [
+      {
+        "name": "Root",
+        "fields": [
+          {
+            "name": "calendars",
+            "type": "CalendarCollection"
+          },
+          {
+            "name": "status",
+            "type": "String"
+          },
+          {
+            "name": "parse",
+            "type": "List",
+            "hints": {
+              "hidden": true
+            },
+            "ofType": {
+              "type": "Ref",
+              "ofType": "Event"
+            },
+            "params": [
+              {
+                "name": "name",
+                "type": "String"
+              },
+              {
+                "name": "value",
+                "type": "String"
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "name": "configure",
+            "type": "Void",
+            "params": [
+              {
+                "name": "clientId",
+                "type": "String"
+              },
+              {
+                "name": "clientSecret",
+                "type": "String"
+              },
+              {
+                "name": "token",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "name": "checkStatus",
+            "type": "Boolean"
+          },
+          {
+            "name": "endpoint",
+            "type": "String",
+            "hints": {
+              "hidden": true
+            },
+            "params": [
+              {
+                "name": "method",
+                "type": "String"
+              },
+              {
+                "name": "body",
+                "type": "String"
+              },
+              {
+                "name": "path",
+                "type": "String"
+              },
+              { "name": "query", "type": "String" },
+              { "name": "headers", "type": "String" }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "CalendarCollection",
+        "fields": [
+          {
+            "name": "one",
+            "type": "Calendar",
+            "params": [
+              {
+                "name": "id",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "name": "page",
+            "type": "CalendarPage",
+            "description": "All the calendars",
+            "params": [
+              {
+                "name": "maxResults",
+                "type": "Int",
+                "description": "Maximum number of threads to return."
+              },
+              {
+                "name": "minAcessRole",
+                "type": "String",
+                "description": "The minimum access role for the user in the returned entries."
+              },
+              {
+                "name": "pageToken",
+                "type": "String",
+                "description": "Page token to retrieve a specific page of results in the list"
+              },
+              {
+                "name": "showDeleted",
+                "type": "Boolean",
+                "description": "Whether to include deleted calendar list entries in the result."
+              },
+              {
+                "name": "showHidden",
+                "type": "Boolean",
+                "description": "Whether to show hidden entries."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "CalendarPage",
+        "fields": [
+          {
+            "name": "items",
+            "type": "List",
+            "ofType": "Calendar"
+          },
+          {
+            "name": "next",
+            "type": "Ref",
+            "ofType": "CalendarPage"
+          }
+        ]
+      },
+      {
+        "name": "Calendar",
+        "fields": [
+          {
+            "name": "id",
+            "description": "Calendar identifier",
+            "type": "String"
+          },
+          {
+            "name": "etag",
+            "description": "ETag of the resource",
+            "type": "String"
+          },
+          {
+            "name": "summary",
+            "hints": {
+              "primary": true
+            },
+            "description": "Title of the calendar",
+            "type": "String"
+          },
+          {
+            "name": "description",
+            "description": "Description of the calendar",
+            "type": "String"
+          },
+          {
+            "name": "location",
+            "description": "Geographic location of the calendar as free-form text",
+            "type": "String"
+          },
+          {
+            "name": "timeZone",
+            "description": "The time zone of the calendar",
+            "type": "String"
+          },
+          {
+            "name": "events",
+            "description": "Events in this calendar",
+            "type": "EventCollection"
+          }
+        ],
+        "actions": [
+          {
+            "name": "renewWebhook",
+            "type": "Void",
+            "hints": { "hidden": true }
+          }
+        ]
+      },
+      {
+        "name": "CalendarList",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "kind",
+            "type": "String"
+          },
+          {
+            "name": "etag",
+            "type": "String"
+          },
+          {
+            "name": "summary",
+            "type": "String"
+          },
+          {
+            "name": "description",
+            "type": "String"
+          },
+          {
+            "name": "location",
+            "type": "String"
+          },
+          {
+            "name": "timeZone",
+            "type": "String"
+          },
+          {
+            "name": "summaryOverride",
+            "type": "String"
+          },
+          {
+            "name": "colorId",
+            "type": "String"
+          },
+          {
+            "name": "backgroundColor",
+            "type": "String"
+          },
+          {
+            "name": "foregroundColor",
+            "type": "String"
+          },
+          {
+            "name": "hidden",
+            "type": "Boolean"
+          },
+          {
+            "name": "selected",
+            "type": "Boolean"
+          },
+          {
+            "name": "primary",
+            "type": "Boolean"
+          },
+          {
+            "name": "deleted",
+            "type": "Boolean"
+          },
+          {
+            "name": "accessRole",
+            "type": "String"
+          },
+          {
+            "name": "defaultReminders",
+            "type": "List",
+            "ofType": "Reminder"
+          }
+        ]
+      },
+      {
+        "name": "Reminder",
+        "fields": [
+          {
+            "name": "method",
+            "type": "String"
+          },
+          {
+            "name": "minutes",
+            "type": "Int"
+          }
+        ]
+      },
+      {
+        "name": "EventCollection",
+        "fields": [
+          {
+            "name": "one",
+            "type": "Event",
+            "params": [
+              {
+                "name": "id",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "name": "page",
+            "type": "EventPage",
+            "params": [
+              {
+                "name": "calendar",
+                "type": "String"
+              },
+              {
+                "name": "alwaysIncludeEmail",
+                "type": "Boolean"
+              },
+              {
+                "name": "iCalUID",
+                "type": "String"
+              },
+              {
+                "name": "maxAttendees",
+                "type": "Int"
+              },
+              {
+                "name": "maxResults",
+                "type": "Int"
+              },
+              {
+                "name": "orderBy",
+                "type": "String"
+              },
+              {
+                "name": "pageToken",
+                "type": "String"
+              },
+              {
+                "name": "privateExtendedProperty",
+                "type": "String"
+              },
+              {
+                "name": "q",
+                "type": "String"
+              },
+              {
+                "name": "showDeleted",
+                "type": "Boolean"
+              },
+              {
+                "name": "showHiddenInvitations",
+                "type": "Boolean"
+              },
+              {
+                "name": "singleEvents",
+                "type": "Boolean"
+              },
+              {
+                "name": "timeMax",
+                "type": "String"
+              },
+              {
+                "name": "timeMin",
+                "type": "String"
+              },
+              {
+                "name": "timeZone",
+                "type": "String"
+              },
+              {
+                "name": "updateMin",
+                "type": "String"
+              }
+            ]
+          }
+        ],
+        "actions": [],
+        "events": []
+      },
+      {
+        "name": "EventPage",
+        "fields": [
+          {
+            "name": "items",
+            "type": "List",
+            "ofType": "Event"
+          },
+          {
+            "name": "next",
+            "type": "Ref",
+            "ofType": "EventPage"
+          }
+        ]
+      },
+      {
+        "name": "Event",
+        "actions": [
+          {
+            "name": "emitNotification",
+            "description": "Notify subscribers of the notification event",
+            "type": "Void",
+            "hints": {
+              "hidden": true
+            },
+            "params": [
+              {
+                "name": "secondsBefore",
+                "type": "Int"
+              },
+              {
+                "name": "start",
+                "type": "Int",
+                "description": "Start time of the event when the notification was scheduled. Used to verify that the event has not been moved."
+              }
+            ]
+          },
+          {
+            "name": "setSummary",
+            "description": "Sets the summary of the event",
+            "type": "Void",
+            "params": [
+              {
+                "name": "value",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "name": "setDescription",
+            "description": "Sets the description of the event (HTML)",
+            "type": "Void",
+            "params": [
+              {
+                "name": "value",
+                "type": "String"
+              }
+            ]
+          }
+        ],
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "summary",
+            "type": "String",
+            "hints": {
+              "primary": true
+            }
+          },
+          {
+            "name": "description",
+            "type": "String"
+          },
+          {
+            "name": "end",
+            "type": "EventTime"
+          },
+          {
+            "name": "start",
+            "type": "EventTime"
+          },
+          {
+            "name": "recurrence",
+            "type": "List",
+            "ofType": "String"
+          },
+          {
+            "name": "attendees",
+            "type": "List",
+            "ofType": "Attendee"
+          },
+          {
+            "name": "instances",
+            "type": "EventInstanceCollection"
+          }
+        ],
+        "events": [
+          {
+            "type": "String",
+            "name": "notification",
+            "params": [
+              {
+                "name": "secondsBefore",
+                "type": "Int"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Attendee",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "email",
+            "type": "String"
+          },
+          {
+            "name": "displayName",
+            "type": "String"
+          },
+          {
+            "name": "organizer",
+            "type": "Boolean"
+          },
+          {
+            "name": "self",
+            "type": "Boolean"
+          },
+          {
+            "name": "resource",
+            "type": "Boolean"
+          },
+          {
+            "name": "optional",
+            "type": "Boolean"
+          },
+          {
+            "name": "responseStatus",
+            "type": "String"
+          },
+          {
+            "name": "comment",
+            "type": "String"
+          },
+          {
+            "name": "additionalGuests",
+            "type": "Int"
+          }
+        ]
+      },
+      {
+        "name": "EventInstanceCollection",
+        "fields": [
+          {
+            "name": "page",
+            "type": "EventInstancePage",
+            "params": [
+              {
+                "name": "pageToken",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "name": "one",
+            "type": "EventInstance",
+            "params": [
+              {
+                "name": "id",
+                "type": "String"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "EventInstancePage",
+        "fields": [
+          {
+            "name": "items",
+            "type": "List",
+            "ofType": "EventInstance"
+          },
+          {
+            "name": "next",
+            "type": "Ref",
+            "ofType": "EventInstancePage"
+          }
+        ]
+      },
+      {
+        "name": "EventInstance",
+        "fields": [
+          {
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "name": "summary",
+            "type": "String",
+            "hints": {
+              "primary": true
+            }
+          },
+          {
+            "name": "end",
+            "type": "EventTime"
+          },
+          {
+            "name": "start",
+            "type": "EventTime"
+          },
+          {
+            "name": "recurrence",
+            "type": "List",
+            "ofType": "String"
+          },
+          {
+            "name": "instances",
+            "type": "EventInstanceCollection"
+          }
+        ]
+      },
+      {
+        "name": "EventTime",
+        "fields": [
+          {
+            "name": "date",
+            "type": "String"
+          },
+          {
+            "name": "dateTime",
+            "type": "String"
+          },
+          {
+            "name": "timeZone",
+            "type": "String"
+          }
+        ],
+        "actions": [],
+        "events": []
+      }
+    ]
+  }
+}
