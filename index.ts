@@ -298,6 +298,46 @@ export const Calendar = {
       throw new Error("Failed to subscribe to calendar");
     }
   },
+  async newEvent({ self, args }) {
+    const { id: calendarId } = self.$argsAt(root.calendars.one);
+    const {
+      conferenceDataVersion,
+      startDateTime,
+      endDateTime,
+      recurrence,
+      ...rest
+    } = args;
+
+    // Add meet conference data if DataVersion = 1
+    let conferenceData = {};
+    if (conferenceDataVersion === 1) {
+      conferenceData = {
+        createRequest: {
+          requestId: randomId(10),
+          conferenceSolutionKey: {
+            type: "hangoutsMeet",
+          },
+        },
+      };
+    }
+    const event = {
+      ...rest,
+      start: {
+        dateTime: startDateTime,
+      },
+      end: {
+        dateTime: endDateTime,
+      },
+      recurrence: [recurrence],
+      conferenceData,
+    };
+    await api(
+      "POST",
+      `calendars/${calendarId}/events`,
+      { conferenceDataVersion },
+      JSON.stringify(event)
+    );
+  },
 };
 
 export const EventCollection = {
@@ -373,6 +413,18 @@ export const Event = {
       return null;
     }
     return {};
+  },
+  async addAttendee({ self, args }) {
+    const { id: calendarId } = self.$argsAt(root.calendars.one);
+    const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
+    const currentlyAttendees = await self.attendees.$query(`{ email, displayName, optional }`);
+
+    await api(
+      "PATCH",
+      `calendars/${calendarId}/events/${eventId}`,
+      null,
+      JSON.stringify({ attendees: [...currentlyAttendees, { ...args }] })
+    );
   },
   async emitNotification({ self, args: { secondsBefore, start } }) {
     // Do a final check to verify that the Event is still scheduled. If an Event that had a subscriber is moved, this
