@@ -45,6 +45,10 @@
                 "type": "String"
               }
             ]
+          },
+          {
+            "name": "authId",
+            "type": "String"
           }
         ],
         "actions": [
