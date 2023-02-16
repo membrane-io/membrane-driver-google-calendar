@@ -109,7 +109,7 @@ function html(body: string) {
 
 export async function endpoint({ args: { path, query, headers, body } }) {
   const link = await nodes.http
-    .authenticated({ api: "google-docs", authId: root.authId })
+    .authenticated({ api: "google-calendar", authId: root.authId })
     .createLink.$invoke();
   switch (path) {
     case "/":
