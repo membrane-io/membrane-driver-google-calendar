@@ -16,6 +16,7 @@
     "types": [
       {
         "name": "Root",
+        "description": "Connect to your Google Calendar and manage your events.",
         "fields": [
           {
             "name": "calendars",
