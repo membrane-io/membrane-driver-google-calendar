@@ -429,7 +429,7 @@ class EventWatcher {
     const event = root.calendars
       .one({ id: this.calendarId })
       .events.one({ id: this.eventId });
-    const start = await event.start.dateTime.$query();
+    const start = new Date(await event.start.dateTime.$get()).getTime();
     if (start !== this.start) {
       console.log(
         `Start time changed for ${this.calendarId}:${this.eventId} from ${this.start} to ${start}`
