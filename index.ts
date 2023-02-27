@@ -116,66 +116,30 @@ export async function endpoint({ args: { path, query, headers, body } }) {
     case "/auth":
     case "/auth/":
     case "/auth/callback":
-      return util.endpoint({ args: { path, query, headers, body }})
+      return util.endpoint({ args: { path, query, headers, body } });
+    case "/webhook/calendar/events": {
+      const re = new RegExp("https://www.googleapis.com/calendar/v./calendars/([^/]+)");
+      const channelId = JSON.parse(headers)["x-goog-channel-id"];
+      const calendarUrl = JSON.parse(headers)["x-goog-resource-uri"];
+      const calendarId = calendarUrl.match(re)?.[1];
+      console.log("Calendar changed: ", calendarId, channelId);
+      const watcher = state.calendarWatchers[calendarId];
+      // Checking for channel ID is important in case in case a previous instance of this driver established a channel
+      // but never stopped it.
+      if (watcher && watcher.channelId === channelId) {
+        await watcher.handleChanged();
+      } else {
+        // This mighty be channel from an older instance, or maybe a calendar we're not observing anymore. In either
+        // case its wasted bandwidth so stop it
+        const resourceId = JSON.parse(headers)["x-goog-resource-id"];
+        await api("POST", `channels/stop`, null, JSON.stringify({ resourceId, id: channelId }));
+      }
+      break;
+    }
     default:
       return JSON.stringify({ status: 404, body: "Not found" });
   }
 }
-// export async function endpoint({ args: { path, query, headers, body } }) {
-//   switch (path) {
-//     case "/": {
-//       return html(`<a href="/auth">Authenticate with Google</a>`);
-//     }
-//     case "/auth":
-//     case "/auth/": {
-//       if (!state.auth) {
-//         return html("Please invoke configure first");
-//       }
-//       const url = state.auth.code.getUri({
-//         query: { access_type: "offline", prompt: "consent" }, // Request refresh token
-//         // TODO: state
-//       });
-//       return JSON.stringify({ status: 303, headers: { location: url } });
-//     }
-//     case "/auth/callback": {
-//       state.accessToken = await state.auth.code.getToken(`${path}?${query}`);
-//       if (state.accessToken?.accessToken) {
-//         return html("Driver configured");
-//       }
-//       return html(
-//         "There was an issue acquiring the access token. Check the logs."
-//       );
-//     }
-//     case "/webhook/calendar/events": {
-//       const re = new RegExp(
-//         "https://www.googleapis.com/calendar/v./calendars/([^/]+)"
-//       );
-//       const channelId = JSON.parse(headers)["x-goog-channel-id"];
-//       const calendarUrl = JSON.parse(headers)["x-goog-resource-uri"];
-//       const calendarId = calendarUrl.match(re)?.[1];
-//       console.log("Calendar changed: ", calendarId, channelId);
-//       const watcher = state.calendarWatchers[calendarId];
-//       // Checking for channel ID is important in case in case a previous instance of this driver established a channel
-//       // but never stopped it.
-//       if (watcher && watcher.channelId === channelId) {
-//         await watcher.handleChanged();
-//       } else {
-//         // This mighty be channel from an older instance, or maybe a calendar we're not observing anymore. In either
-//         // case its wasted bandwidth so stop it
-//         const resourceId = JSON.parse(headers)["x-goog-resource-id"];
-//         await api(
-//           "POST",
-//           `channels/stop`,
-//           null,
-//           JSON.stringify({ resourceId, id: channelId })
-//         );
-//       }
-//       break;
-//     }
-//     default:
-//       console.log("Unknown Endpoint:", path);
-//   }
-// }
 
 type ResolverInfo = {
   fieldNodes: {
