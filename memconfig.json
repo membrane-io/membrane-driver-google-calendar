@@ -9,13 +9,14 @@
       "description": "Calendar Event",
       "type": "text",
       "searchIn": "https://calendar.google.com",
-      "regex": "data-eventid=\"[^\"]+\""
+      "regex": "data-list-item-id=\"guildsnav___[0-9]+\""
     }
   },
   "schema": {
     "types": [
       {
         "name": "Root",
+        "description": "Connect to your Google Calendar and manage your events.",
         "fields": [
           {
             "name": "calendars",
@@ -45,6 +46,10 @@
                 "type": "String"
               }
             ]
+          },
+          {
+            "name": "authId",
+            "type": "String"
           }
         ],
         "actions": [
@@ -89,8 +94,14 @@
                 "name": "path",
                 "type": "String"
               },
-              { "name": "query", "type": "String" },
-              { "name": "headers", "type": "String" }
+              {
+                "name": "query",
+                "type": "String"
+              },
+              {
+                "name": "headers",
+                "type": "String"
+              }
             ]
           }
         ]
@@ -203,7 +214,50 @@
           {
             "name": "renewWebhook",
             "type": "Void",
-            "hints": { "hidden": true }
+            "hints": {
+              "hidden": true
+            }
+          },
+          {
+            "name": "newEvent",
+            "type": "Void",
+            "params": [
+              {
+                "name": "summary",
+                "type": "String",
+                "description": "Title of the event."
+              },
+              {
+                "name": "description",
+                "type": "String",
+                "description": "Description of the event. Can contain HTML. Optional."
+              },
+              {
+                "name": "location",
+                "type": "String",
+                "description": "Geographic location of the event as free-form text. Optional."
+              },
+              {
+                "name": "recurrence",
+                "type": "String",
+                "description": "RRULE, EXRULE, RDATE and EXDATE lines for a recurring event."
+              },
+              {
+                "name": "conferenceDataVersion",
+                "type": "Int",
+                "description": "Version 0 assumes no conference data support and ignores conference data in the event's body. Version 1 enables support."
+              },
+              {
+                "name": "startDateTime",
+                "type": "String",
+                "description": "The (inclusive) end time of the event."
+              },
+              {
+                "name": "endDateTime",
+                "type": "String",
+                "description": "The (exclusive) end time of the event."
+              }
+            ]
           }
         ]
       },
@@ -426,6 +480,25 @@
               {
                 "name": "value",
                 "type": "String"
+              }
+            ]
+          },
+          {
+            "name": "addAttendee",
+            "description": "Add attendee to the event",
+            "type": "Void",
+            "params": [
+              {
+                "name": "email",
+                "type": "String"
+              },
+              {
+                "name": "displayName",
+                "type": "String"
+              },
+              {
+                "name": "optional",
+                "type": "Boolean"
               }
             ]
           },
