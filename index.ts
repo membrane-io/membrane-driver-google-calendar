@@ -89,7 +89,7 @@ async function oauthRequest(
 }
 
 export async function configure({ args: { clientId, clientSecret, token } }) {
-  state.endpointUrl = await nodes.endpoint.$get();
+  state.endpointUrl = await nodes.endpoint;
   state.auth = new ClientOAuth2(
     {
       clientId,
@@ -429,7 +429,7 @@ class EventWatcher {
     const event = root.calendars
       .one({ id: this.calendarId })
       .events.one({ id: this.eventId });
-    const start = new Date(await event.start.dateTime.$get()).getTime();
+    const start = new Date(await event.start.dateTime).getTime();
     if (start !== this.start) {
       console.log(
         `Start time changed for ${this.calendarId}:${this.eventId} from ${this.start} to ${start}`
@@ -492,7 +492,7 @@ async function ensureWatcher(
 ) {
   // TODO: async sema here
   if (!state.calendarWatchers[calendarId]) {
-    await root.calendars.one({ id: calendarId }).renewWebhook.$invoke();
+    await root.calendars.one({ id: calendarId }).renewWebhook();
   } else {
     console.log("Already subscribed to calendar:", calendarId);
   }
