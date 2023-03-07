@@ -1,35 +1,9 @@
 import { nodes, state, root } from "membrane";
-import ClientOAuth2 from "client-oauth2";
 import fetch from "node-fetch";
+import * as util from "./util";
+import { api, createAuthClient } from "./util";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-
-async function api(method: Method, path: string, query?: any, body?: string) {
-  if (!state.accessToken) {
-    throw new Error(
-      "You must authenticated to use this API. Visit the program's /auth endpoint"
-    );
-  }
-  if (query) {
-    Object.keys(query).forEach((key) =>
-      query[key] === undefined ? delete query[key] : {}
-    );
-  }
-  const querystr =
-    query && Object.keys(query).length ? `?${new URLSearchParams(query)}` : "";
-
-  if (state.accessToken.expired()) {
-    console.log("Refreshing access token...");
-    state.accessToken = await state.accessToken.refresh();
-  }
-
-  const req = state.accessToken.sign({
-    method,
-    url: `https://www.googleapis.com/calendar/v3/${path}${querystr}`,
-    body,
-  });
-  return await fetch(req.url, req);
-}
 
 state.notifications = state.notifications ?? [];
 state.calendarWatchers = state.calendarWatchers ?? {};
@@ -38,17 +12,14 @@ if (state.auth) {
 }
 
 export const Root = {
+  authId() {
+    return "google-calendar";
+  },
   blob() {
     // return JSON.stringify(state.accessToken?.data, null, 2);
   },
-  status() {
-    if (!state.auth) {
-      return "Not configured";
-    } else if (!state.accessToken) {
-      return `Please [authenticate with Google](${state.endpointUrl}/auth)`;
-    } else {
-      return `Ready`;
-    }
+  async status() {
+    return await util.authStatus();
   },
   parse({ args: { name, value } }) {
     switch (name) {
@@ -88,29 +59,10 @@ async function oauthRequest(
   return { status, body };
 }
 
-export async function configure({ args: { clientId, clientSecret, token } }) {
-  state.endpointUrl = await nodes.endpoint;
-  state.auth = new ClientOAuth2(
-    {
-      clientId,
-      clientSecret,
-      accessTokenUri: "https://oauth2.googleapis.com/token",
-      authorizationUri: "https://accounts.google.com/o/oauth2/v2/auth",
-      redirectUri: `${state.endpointUrl}/auth/callback`,
-      scopes: [
-        "https://www.googleapis.com/auth/calendar.readonly",
-        "https://www.googleapis.com/auth/calendar.events",
-      ],
-    },
-    oauthRequest
-  );
-  // Token is optional, but it's convenient while working on this driver (and perhaps constantly killing it) to avoid
-  // having to auth with Google over and over
-  if (token) {
-    // If restoring a token, assume it's expired
-    const data = { ...JSON.parse(token), expires_in: 0 };
-    state.accessToken = state.auth.createToken(null, null, null, data);
-  }
+export async function configure({ args: { clientId, clientSecret } }) {
+  state.clientId = clientId;
+  state.clientSecret = clientSecret;
+  await createAuthClient();
 }
 
 // Helper function to produce nicer HTML
@@ -131,34 +83,17 @@ function html(body: string) {
 }
 
 export async function endpoint({ args: { path, query, headers, body } }) {
+  const link = await nodes.http
+    .authenticated({ api: "google-calendar", authId: root.authId })
+    .createLink.$invoke();
   switch (path) {
-    case "/": {
-      return html(`<a href="/auth">Authenticate with Google</a>`);
-    }
+    case "/":
     case "/auth":
-    case "/auth/": {
-      if (!state.auth) {
-        return html("Please invoke configure first");
-      }
-      const url = state.auth.code.getUri({
-        query: { access_type: "offline", prompt: "consent" }, // Request refresh token
-        // TODO: state
-      });
-      return JSON.stringify({ status: 303, headers: { location: url } });
-    }
-    case "/auth/callback": {
-      state.accessToken = await state.auth.code.getToken(`${path}?${query}`);
-      if (state.accessToken?.accessToken) {
-        return html("Driver configured");
-      }
-      return html(
-        "There was an issue acquiring the access token. Check the logs."
-      );
-    }
+    case "/auth/":
+    case "/auth/callback":
+      return util.endpoint({ args: { path, query, headers, body } });
     case "/webhook/calendar/events": {
-      const re = new RegExp(
-        "https://www.googleapis.com/calendar/v./calendars/([^/]+)"
-      );
+      const re = new RegExp("https://www.googleapis.com/calendar/v./calendars/([^/]+)");
       const channelId = JSON.parse(headers)["x-goog-channel-id"];
       const calendarUrl = JSON.parse(headers)["x-goog-resource-uri"];
       const calendarId = calendarUrl.match(re)?.[1];
@@ -172,17 +107,12 @@ export async function endpoint({ args: { path, query, headers, body } }) {
         // This mighty be channel from an older instance, or maybe a calendar we're not observing anymore. In either
         // case its wasted bandwidth so stop it
         const resourceId = JSON.parse(headers)["x-goog-resource-id"];
-        await api(
-          "POST",
-          `channels/stop`,
-          null,
-          JSON.stringify({ resourceId, id: channelId })
-        );
+        await api("POST", `channels/stop`, null, JSON.stringify({ resourceId, id: channelId }));
       }
       break;
     }
     default:
-      console.log("Unknown Endpoint:", path);
+      return JSON.stringify({ status: 404, body: "Not found" });
   }
 }
 
@@ -298,6 +228,46 @@ export const Calendar = {
       throw new Error("Failed to subscribe to calendar");
     }
   },
+  async newEvent({ self, args }) {
+    const { id: calendarId } = self.$argsAt(root.calendars.one);
+    const {
+      conferenceDataVersion,
+      startDateTime,
+      endDateTime,
+      recurrence,
+      ...rest
+    } = args;
+
+    // Add meet conference data if DataVersion = 1
+    let conferenceData = {};
+    if (conferenceDataVersion === 1) {
+      conferenceData = {
+        createRequest: {
+          requestId: randomId(10),
+          conferenceSolutionKey: {
+            type: "hangoutsMeet",
+          },
+        },
+      };
+    }
+    const event = {
+      ...rest,
+      start: {
+        dateTime: startDateTime,
+      },
+      end: {
+        dateTime: endDateTime,
+      },
+      recurrence: [recurrence],
+      conferenceData,
+    };
+    await api(
+      "POST",
+      `calendars/${calendarId}/events`,
+      { conferenceDataVersion },
+      JSON.stringify(event)
+    );
+  },
 };
 
 export const EventCollection = {
@@ -373,6 +343,18 @@ export const Event = {
       return null;
     }
     return {};
+  },
+  async addAttendee({ self, args }) {
+    const { id: calendarId } = self.$argsAt(root.calendars.one);
+    const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
+    const currentlyAttendees = await self.attendees.$query(`{ email, displayName, optional }`);
+
+    await api(
+      "PATCH",
+      `calendars/${calendarId}/events/${eventId}`,
+      null,
+      JSON.stringify({ attendees: [...currentlyAttendees, { ...args }] })
+    );
   },
   async emitNotification({ self, args: { secondsBefore, start } }) {
     // Do a final check to verify that the Event is still scheduled. If an Event that had a subscriber is moved, this
