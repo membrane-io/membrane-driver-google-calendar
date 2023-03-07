@@ -2,8 +2,6 @@ import { nodes, state, root } from "membrane";
 import * as util from "./util";
 import { api, createAuthClient } from "./util";
 
-type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-
 state.notifications = state.notifications ?? [];
 state.calendarWatchers = state.calendarWatchers ?? {};
 if (state.auth) {
