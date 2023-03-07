@@ -1,5 +1,4 @@
 import { nodes, state, root } from "membrane";
-import fetch from "node-fetch";
 import * as util from "./util";
 import { api, createAuthClient } from "./util";
 
