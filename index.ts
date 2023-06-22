@@ -88,7 +88,9 @@ export async function endpoint({ args: { path, query, headers, body } }) {
     case "/auth/callback":
       return util.endpoint({ args: { path, query, headers, body } });
     case "/webhook/calendar/events": {
-      const re = new RegExp("https://www.googleapis.com/calendar/v./calendars/([^/]+)");
+      const re = new RegExp(
+        "https://www.googleapis.com/calendar/v./calendars/([^/]+)"
+      );
       const channelId = JSON.parse(headers)["x-goog-channel-id"];
       const calendarUrl = JSON.parse(headers)["x-goog-resource-uri"];
       const calendarId = calendarUrl.match(re)?.[1];
@@ -102,7 +104,12 @@ export async function endpoint({ args: { path, query, headers, body } }) {
         // This mighty be channel from an older instance, or maybe a calendar we're not observing anymore. In either
         // case its wasted bandwidth so stop it
         const resourceId = JSON.parse(headers)["x-goog-resource-id"];
-        await api("POST", `channels/stop`, null, JSON.stringify({ resourceId, id: channelId }));
+        await api(
+          "POST",
+          `channels/stop`,
+          null,
+          JSON.stringify({ resourceId, id: channelId })
+        );
       }
       break;
     }
@@ -342,7 +349,9 @@ export const Event = {
   async addAttendee({ self, args }) {
     const { id: calendarId } = self.$argsAt(root.calendars.one);
     const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
-    const currentlyAttendees = await self.attendees.$query(`{ email, displayName, optional }`);
+    const currentlyAttendees = await self.attendees.$query(
+      `{ email, displayName, optional }`
+    );
 
     await api(
       "PATCH",
