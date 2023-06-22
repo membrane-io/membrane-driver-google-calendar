@@ -9,7 +9,7 @@
       "description": "Calendar Event",
       "type": "text",
       "searchIn": "https://calendar.google.com",
-      "regex": "data-list-item-id=\"guildsnav___[0-9]+\""
+      "regex": "data-eventid=\"[^\"]+\""
     }
   },
   "schema": {
@@ -131,27 +131,32 @@
               {
                 "name": "maxResults",
                 "type": "Int",
-                "description": "Maximum number of threads to return."
+                "description": "Maximum number of threads to return.",
+                "optional": true
               },
               {
                 "name": "minAcessRole",
                 "type": "String",
-                "description": "The minimum access role for the user in the returned entries."
+                "description": "The minimum access role for the user in the returned entries.",
+                "optional": true
               },
               {
                 "name": "pageToken",
                 "type": "String",
-                "description": "Page token to retrieve a specific page of results in the list"
+                "description": "Page token to retrieve a specific page of results in the list",
+                "optional": true
               },
               {
                 "name": "showDeleted",
                 "type": "Boolean",
-                "description": "Whether to include deleted calendar list entries in the result."
+                "description": "Whether to include deleted calendar list entries in the result.",
+                "optional": true
               },
               {
                 "name": "showHidden",
                 "type": "Boolean",
-                "description": "Whether to show hidden entries."
+                "description": "Whether to show hidden entries.",
+                "optional": true
               }
             ]
           }
@@ -229,37 +234,44 @@
               {
                 "name": "summary",
                 "type": "String",
-                "description": "Title of the event."
+                "description": "Title of the event.",
+                "optional": true
               },
               {
                 "name": "description",
                 "type": "String",
-                "description": "Description of the event. Can contain HTML. Optional."
+                "description": "Description of the event. Can contain HTML. Optional.",
+                "optional": true
               },
               {
                 "name": "location",
                 "type": "String",
-                "description": "Geographic location of the event as free-form text. Optional."
+                "description": "Geographic location of the event as free-form text. Optional.",
+                "optional": true
               },
               {
                 "name": "recurrence",
                 "type": "String",
-                "description": "RRULE, EXRULE, RDATE and EXDATE lines for a recurring event."
+                "description": "RRULE, EXRULE, RDATE and EXDATE lines for a recurring event.",
+                "optional": true
               },
               {
                 "name": "conferenceDataVersion",
                 "type": "Int",
-                "description": "Version 0 assumes no conference data support and ignores conference data in the event's body. Version 1 enables support."
+                "description": "Version 0 assumes no conference data support and ignores conference data in the event's body. Version 1 enables support.",
+                "optional": true
               },
               {
                 "name": "startDateTime",
                 "type": "String",
-                "description": "The (inclusive) end time of the event."
+                "description": "The (inclusive) end time of the event.",
+                "optional": true
               },
               {
                 "name": "endDateTime",
                 "type": "String",
-                "description": "The (exclusive) end time of the event."
+                "description": "The (exclusive) end time of the event.",
+                "optional": true
               }
             ]
           }
@@ -371,67 +383,83 @@
             "params": [
               {
                 "name": "calendar",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "alwaysIncludeEmail",
-                "type": "Boolean"
+                "type": "Boolean",
+                "optional": true
               },
               {
                 "name": "iCalUID",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "maxAttendees",
-                "type": "Int"
+                "type": "Int",
+                "optional": true
               },
               {
                 "name": "maxResults",
-                "type": "Int"
+                "type": "Int",
+                "optional": true
               },
               {
                 "name": "orderBy",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "pageToken",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "privateExtendedProperty",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "q",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "showDeleted",
-                "type": "Boolean"
+                "type": "Boolean",
+                "optional": true
               },
               {
                 "name": "showHiddenInvitations",
-                "type": "Boolean"
+                "type": "Boolean",
+                "optional": true
               },
               {
                 "name": "singleEvents",
-                "type": "Boolean"
+                "type": "Boolean",
+                "optional": true
               },
               {
                 "name": "timeMax",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "timeMin",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "timeZone",
-                "type": "String"
+                "type": "String",
+                "optional": true
               },
               {
                 "name": "updateMin",
-                "type": "String"
+                "type": "String",
+                "optional": true
               }
             ]
           }
@@ -467,12 +495,14 @@
             "params": [
               {
                 "name": "secondsBefore",
-                "type": "Int"
+                "type": "Int",
+                "optional": true
               },
               {
                 "name": "start",
                 "type": "Int",
-                "description": "Start time of the event when the notification was scheduled. Used to verify that the event has not been moved."
+                "description": "Start time of the event when the notification was scheduled. Used to verify that the event has not been moved.",
+                "optional": true
               }
             ]
           },
@@ -502,7 +532,8 @@
               },
               {
                 "name": "optional",
-                "type": "Boolean"
+                "type": "Boolean",
+                "optional": true
               }
             ]
           },
@@ -624,7 +655,8 @@
             "params": [
               {
                 "name": "pageToken",
-                "type": "String"
+                "type": "String",
+                "optional": true
               }
             ]
           },

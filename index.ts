@@ -36,8 +36,6 @@ export const Root = {
     return [];
   },
   calendars: () => ({}),
-  events: () => ({}),
-  instances: () => ({}),
   checkStatus: async () => {
     const res = await api("GET", `users/me/calendarList`, { maxResults: 1 });
     return res.status === 200;
