@@ -42,6 +42,13 @@ export const Root = {
   },
 };
 
+export const Tests = {
+  testGetAllCalendars: async () => {
+    const items = await root.calendars.page.items.$query(`{ id }`);
+    return Array.isArray(items) && (items.length === 0 || items.length > 0);
+  }
+};
+
 async function oauthRequest(
   method: string,
   url: string,
