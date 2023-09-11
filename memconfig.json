@@ -1,8 +1,6 @@
 {
   "dependencies": {
-    "clock": "sys-clock:",
-    "http": "http:",
-    "endpoint": "sys-process:endpointUrl"
+    "http": "http:"
   },
   "expressions": {
     "eventUrl": {

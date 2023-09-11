@@ -1,6 +1,5 @@
 import ClientOAuth2 from "client-oauth2";
 import { nodes, state, root } from "membrane";
-import fetch from "node-fetch";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -19,7 +18,11 @@ export async function api(
     query && Object.keys(query).length ? `?${new URLSearchParams(query)}` : "";
 
   // The HTTP node to use. Either Membrane's authenticated HTTP node or the regular one we have an access token.
-  let req = { method, url: `https://www.googleapis.com/calendar/v3/${path}${querystr}`, body };
+  let req = {
+    method,
+    url: `https://www.googleapis.com/calendar/v3/${path}${querystr}`,
+    body,
+  };
   if (state.accessToken) {
     if (state.accessToken.expired()) {
       console.log("Refreshing access token...");
@@ -28,7 +31,7 @@ export async function api(
 
     req = state.accessToken.sign(req);
   }
-  
+
   return await fetch(req.url, { ...req, http: httpNode() });
 }
 
@@ -53,7 +56,7 @@ export async function authStatus() {
 }
 
 // The HTTP node to use, depends on whether we have a user-provided API key or not
-function httpNode(): NodeGref<http.Root | http.Authenticated> {
+function httpNode(): http.Root | http.Authenticated {
   if (usingUserApiKey()) {
     return nodes.http;
   } else {
@@ -61,7 +64,7 @@ function httpNode(): NodeGref<http.Root | http.Authenticated> {
   }
 }
 
-function authenticatedNode(): NodeGref<http.Authenticated> {
+function authenticatedNode(): http.Authenticated {
   return nodes.http.authenticated({
     api: "google-calendar",
     authId: root.authId,
@@ -183,7 +186,7 @@ export async function endpointUrl() {
 }
 
 async function oauthRequest(
-  method: string,
+  method: RequestMethod,
   url: string,
   reqBody: string,
   headers: any

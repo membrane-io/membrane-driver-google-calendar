@@ -18,7 +18,7 @@ export const Root = {
   async status() {
     return await util.authStatus();
   },
-  parse({ args: { name, value } }) {
+  parse({ name, value }) {
     switch (name) {
       case "eventUrl": {
         const id64 = value.match(/data-eventid="([^\"]+)"/)?.[1];
@@ -46,11 +46,11 @@ export const Tests = {
   testGetAllCalendars: async () => {
     const items = await root.calendars.page.items.$query(`{ id }`);
     return Array.isArray(items);
-  }
+  },
 };
 
 async function oauthRequest(
-  method: string,
+  method: "get" | "post" | "put" | "patch" | "delete",
   url: string,
   reqBody: string,
   headers: any
@@ -61,7 +61,7 @@ async function oauthRequest(
   return { status, body };
 }
 
-export async function configure({ args: { clientId, clientSecret } }) {
+export async function configure({ clientId, clientSecret }) {
   state.clientId = clientId;
   state.clientSecret = clientSecret;
   await createAuthClient();
@@ -84,10 +84,7 @@ function html(body: string) {
   `;
 }
 
-export async function endpoint({ args: { path, query, headers, body } }) {
-  const link = await nodes.http
-    .authenticated({ api: "google-calendar", authId: root.authId })
-    .createLink.$invoke();
+export async function endpoint({ path, query, headers, body }) {
   switch (path) {
     case "/":
     case "/auth":
@@ -143,7 +140,7 @@ const shouldFetch = (info: ResolverInfo, simpleFields: string[]) =>
     .some(({ name: { value } }) => !simpleFields.includes(value));
 
 export const CalendarCollection = {
-  async one({ args: { id }, context, info }) {
+  async one({ id }, { context, info }) {
     context.calendarId = id;
     if (!shouldFetch(info, ["id", "events"])) {
       return { id };
@@ -151,7 +148,7 @@ export const CalendarCollection = {
     const res = await api("GET", `calendars/${encodeURIComponent(id)}`);
     return await res.json();
   },
-  async page({ args, context }) {
+  async page(args, { context }) {
     const { pageToken } = args;
     const maxResults = args.maxResults || 25;
     context.calendarPageArgs = args;
@@ -164,7 +161,7 @@ export const CalendarCollection = {
 };
 
 export let CalendarPage = {
-  next({ obj, context }) {
+  next(_, { obj, context }) {
     if (obj.nextPageToken) {
       const { calendarPageArgs } = context;
       return root.calendars.page({
@@ -176,7 +173,7 @@ export let CalendarPage = {
 };
 
 export const Calendar = {
-  gref({ obj }) {
+  gref(_, { obj }) {
     return root.calendars.one({ id: obj.id });
   },
   events() {
@@ -185,14 +182,11 @@ export const Calendar = {
     return {};
   },
 
-  async renewWebhook({ self }) {
+  async renewWebhook(_, { self }) {
     const { id: calendarId } = self.$argsAt(self);
     const channelId = randomId(16) + "-membrane";
-    const ttl = 60 * 3;
+    const ttl = 60 * 60 * 24;
 
-    console.log(
-      `Subscribing to calendar webhook: ${calendarId} for ${ttl} seconds`
-    );
     const body = JSON.stringify({
       id: channelId,
       token: "unused",
@@ -207,37 +201,25 @@ export const Calendar = {
       body
     );
     if (res.status === 200) {
-      console.log(
-        "Subscribed to calendar webhook:",
-        calendarId,
-        ":",
-        res.status,
-        ":",
-        await res.text()
-      );
+      const text = await res.text();
+      console.log(`Now watching calendar ${calendarId}: ${text}`);
+
       state.calendarWatchers[calendarId] = new CalendarWatcher(
         calendarId,
         channelId,
         ttl
       );
 
-      // Renew the webhook ~30s before it expires
-      await self.renewWebhook.$invokeAt(
-        new Date(Date.now() + (ttl - 30) * 1000)
-      );
+      // Renew the webhook 5 min before it expires
+      await self.renewWebhook.$invokeIn(ttl - 60 * 5);
     } else {
-      console.log(
-        "Failed to subscribe to calendar:",
-        calendarId,
-        ":",
-        res.status,
-        ":",
-        await res.text()
-      );
-      throw new Error("Failed to subscribe to calendar");
+      const text = await res.text();
+      const error = `Failed to watch calendar: ${calendarId}: ${res.status}: ${text}`;
+      console.log(error);
+      throw new Error(error);
     }
   },
-  async newEvent({ self, args }) {
+  async newEvent(args, { self }) {
     const { id: calendarId } = self.$argsAt(root.calendars.one);
     const {
       conferenceDataVersion,
@@ -280,7 +262,7 @@ export const Calendar = {
 };
 
 export const EventCollection = {
-  async one({ args, context }) {
+  async one(args, { context }) {
     context.eventId = args.id;
     const res = await api(
       "GET",
@@ -288,7 +270,7 @@ export const EventCollection = {
     );
     return await res.json();
   },
-  async page({ args, context }) {
+  async page(args, { context }) {
     let { pageToken, timeMin, timeMax, orderBy, q } = args;
     context.eventPageArgs = args;
     const maxResults = args.maxResults || 25;
@@ -309,7 +291,7 @@ export const EventCollection = {
 };
 
 export const EventPage = {
-  next({ context, obj }) {
+  next(_, { context, obj }) {
     if (obj.nextPageToken) {
       const { calendarId, eventPageArgs } = context;
       return root.calendars
@@ -318,7 +300,7 @@ export const EventPage = {
         .page({ ...eventPageArgs, pageToken: obj.nextPageToken });
     }
   },
-  items({ obj }) {
+  items(_, { obj }) {
     if (obj) {
       return obj.items.map(
         (event) => new globalThis.ContextWrapper(event, { eventId: event.id })
@@ -331,7 +313,6 @@ const patchEvent = (field: string) => {
   return async ({ self, args }) => {
     const { id: calendarId } = self.$argsAt(root.calendars.one);
     const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
-    console.log("VALUE", args.value);
     await api(
       "PATCH",
       `calendars/${calendarId}/events/${eventId}`,
@@ -342,18 +323,18 @@ const patchEvent = (field: string) => {
 };
 
 export const Event = {
-  gref({ obj, context, args }) {
+  gref(args, { obj, context }) {
     const id = obj.id ?? args.id;
     return root.calendars.one({ id: context.calendarId }).events.one({ id });
   },
-  instances({ obj }) {
+  instances(_, { obj }) {
     if (obj.id && !obj.recurrence) {
       // No point on hitting the /instances endpoint if there's no recurrence
       return null;
     }
     return {};
   },
-  async addAttendee({ self, args }) {
+  async addAttendee(args, { self }) {
     const { id: calendarId } = self.$argsAt(root.calendars.one);
     const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
     const currentlyAttendees = await self.attendees.$query(
@@ -367,24 +348,31 @@ export const Event = {
       JSON.stringify({ attendees: [...currentlyAttendees, { ...args }] })
     );
   },
-  async emitNotification({ self, args: { secondsBefore, start } }) {
+  async emitNotification({ secondsBefore, start }, { self }) {
     // Do a final check to verify that the Event is still scheduled. If an Event that had a subscriber is moved, this
     // driver doesn't currently unset the old timer so we get "supurious" invocations of this action in those cases.
-    const currentStart = await self.start.dateTime.$query();
+    const currentStart = new Date(await self.start.dateTime).getTime();
     if (start === currentStart) {
       self.notification({ secondsBefore }).$emit();
     } else {
-      console.log(`Ignoring notification for ${self}`);
+      console.log(
+        `Ignoring notification for ${self} start=${start} currentStart=${currentStart}`
+      );
     }
   },
   notification: {
-    async subscribe({ self, args: { secondsBefore } }) {
+    async subscribe({ secondsBefore }, { self }) {
+      // NOTE: when secondsBefore is undefined we default to zero seconds but it's important to treat it as a separate
+      // event because the subscription won't have the arg.
+      if (secondsBefore < 0) {
+        throw new Error('Expected "secondsBefore" to be a positive number');
+      }
       const { id: calendarId } = self.$argsAt(root.calendars.one);
       const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
       const start = await self.start.dateTime.$query();
       await ensureWatcher(calendarId, eventId, start, secondsBefore);
     },
-    unsubscribe({ self }) {
+    unsubscribe(_, { self }) {
       const { id: calendarId } = self.$argsAt(root.calendars.one);
     },
   },
@@ -394,35 +382,34 @@ export const Event = {
 
 class EventWatcher {
   // TODO: Use EventGrefs instead of "seconds before"
-  public notifications: Set<number> = new Set();
+  public notifications: Set<number | undefined> = new Set();
   public readonly calendarId: string;
   public readonly eventId: string;
   public start: number;
+  private event: Event;
 
   constructor(calendarId: string, eventId: string, start: number) {
     this.calendarId = calendarId;
     this.eventId = eventId;
     this.start = start;
-  }
-
-  async watchEvent(secondsBefore: number) {
-    const event = root.calendars
+    this.event = root.calendars
       .one({ id: this.calendarId })
       .events.one({ id: this.eventId });
+  }
+
+  async watchEvent(secondsBefore?: number) {
     const time = new Date(
       new Date(this.start).getTime() - (secondsBefore ?? 0) * 1000
     );
-    await event
+    this.notifications.add(secondsBefore);
+    await this.event
       .emitNotification({ secondsBefore, start: this.start })
       .$invokeAt(time);
-    this.notifications.add(secondsBefore);
   }
 
+  // Called when the calendar changed so this Event may have changed.
   async handleMaybeChanged() {
-    const event = root.calendars
-      .one({ id: this.calendarId })
-      .events.one({ id: this.eventId });
-    const start = new Date(await event.start.dateTime).getTime();
+    const start = new Date(await this.event.start.dateTime).getTime();
     if (start !== this.start) {
       console.log(
         `Start time changed for ${this.calendarId}:${this.eventId} from ${this.start} to ${start}`
@@ -430,16 +417,31 @@ class EventWatcher {
       this.start = start;
       for (const secondsBefore of this.notifications) {
         console.log(
+          `Updating notification for ${secondsBefore} seconds before!`
+        );
+        const time = new Date(
+          new Date(start).getTime() - (secondsBefore ?? 0) * 1000
+        );
+        console.log(
           `Updating notification for ${secondsBefore} seconds before`
         );
-        const time = new Date(new Date(start).getTime() - secondsBefore * 1000);
-        event.emitNotification({ secondsBefore, start }).$invokeAt(time);
+        let args: any = { start };
+        if (typeof secondsBefore === "number") {
+          args = { ...args, secondsBefore };
+        }
+        console.log(
+          `Emitting ${this.calendarId}:${
+            this.eventId
+          } at ${time} (${time.toISOString()})`
+        );
+        this.event.emitNotification(args).$invokeAt(time);
       }
     }
   }
 }
 
-// Represents a calendar that's been watched via webhook and keeps track of event subscriptions related to it
+// Helper that keeps track of the Event subscriptions related to a calendar so we can update them when the calendar
+// changes (there's no way to watch a calendar Event directly).
 class CalendarWatcher {
   public readonly calendarId: string;
   public readonly channelId: string;
@@ -454,10 +456,13 @@ class CalendarWatcher {
     this.ttl = ttl;
   }
 
-  watchEvent(eventId: string, start: number, secondsBefore: number) {
+  watchEvent(eventId: string, start: number, secondsBefore?: number) {
     const watcher =
       this.eventWatchers.get(eventId) ??
       new EventWatcher(this.calendarId, eventId, start);
+    // HACK: deleteme
+    Object.setPrototypeOf(watcher, EventWatcher.prototype);
+
     watcher.watchEvent(secondsBefore);
     this.eventWatchers.set(eventId, watcher);
   }
@@ -466,7 +471,9 @@ class CalendarWatcher {
   // to adjust any timer.
   async handleChanged() {
     for (const watcher of this.eventWatchers.values()) {
-      watcher.handleMaybeChanged();
+      // HACK: deleteme
+      Object.setPrototypeOf(watcher, EventWatcher.prototype);
+      await watcher.handleMaybeChanged();
     }
   }
 }
@@ -481,14 +488,20 @@ async function ensureWatcher(
   calendarId: string,
   eventId: string,
   start: number,
-  secondsBefore: number
+  secondsBefore: number | undefined
 ) {
   // TODO: async sema here
   if (!state.calendarWatchers[calendarId]) {
     await root.calendars.one({ id: calendarId }).renewWebhook();
   } else {
-    console.log("Already subscribed to calendar:", calendarId);
+    console.log("Already watching calendar: ", calendarId);
   }
+
+  // HACK: deleteme
+  Object.setPrototypeOf(
+    state.calendarWatchers[calendarId],
+    CalendarWatcher.prototype
+  );
   await state.calendarWatchers[calendarId]?.watchEvent(
     eventId,
     start,
@@ -497,14 +510,14 @@ async function ensureWatcher(
 }
 
 export const EventInstanceCollection = {
-  async one({ args, context }) {
+  async one(args, { context }) {
     const { calendarId, event } = context;
     return await api(
       "GET",
       `calendars/${calendarId}/events/${event.id}/instances/${args.id}`
     );
   },
-  async page({ args, context }) {
+  async page(args, { context }) {
     const { pageToken } = args;
     const { calendarId, eventId } = context;
     context.eventInstancePageArgs = args;
@@ -519,7 +532,7 @@ export const EventInstanceCollection = {
 };
 
 export const EventInstancePage = {
-  next({ obj, context }) {
+  next(_, { obj, context }) {
     if (obj.nextPageToken) {
       const { calendarId, eventId, eventInstancePageArgs } = context;
       return root.calendars
@@ -534,7 +547,7 @@ export const EventInstancePage = {
 };
 
 export const EventInstance = {
-  gref({ obj, context }) {
+  gref(_, { obj, context }) {
     const { calendarId, eventId } = context;
     return root.calendars
       .one({ id: calendarId })
