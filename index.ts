@@ -90,7 +90,7 @@ export async function endpoint({ path, query, headers, body }) {
     case "/auth":
     case "/auth/":
     case "/auth/callback":
-      return util.endpoint({ args: { path, query, headers, body } });
+      return util.endpoint({ path, query, headers, body });
     case "/webhook/calendar/events": {
       const re = new RegExp(
         "https://www.googleapis.com/calendar/v./calendars/([^/]+)"
@@ -310,7 +310,7 @@ export const EventPage = {
 };
 
 const patchEvent = (field: string) => {
-  return async ({ self, args }) => {
+  return async (args, { self }) => {
     const { id: calendarId } = self.$argsAt(root.calendars.one);
     const { id: eventId } = self.$argsAt(root.calendars.one.events.one);
     await api(

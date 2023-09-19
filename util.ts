@@ -71,7 +71,7 @@ function authenticatedNode(): http.Authenticated {
   });
 }
 
-export async function endpoint({ args: { path, query, headers, body } }) {
+export async function endpoint({ path, query, headers, body }) {
   const link = await nodes.http
     .authenticated({ api: "google-calendar", authId: root.authId })
     .createLink.$invoke();
@@ -186,12 +186,16 @@ export async function endpointUrl() {
 }
 
 async function oauthRequest(
-  method: RequestMethod,
+  method: string,
   url: string,
   reqBody: string,
   headers: any
 ) {
-  const res = await fetch(url, { body: reqBody.toString(), headers, method });
+  const res = await fetch(url, {
+    body: reqBody.toString(),
+    headers,
+    method: method as RequestMethod,
+  });
   const status = res.status;
   const body = await res.text();
   return { status, body };
