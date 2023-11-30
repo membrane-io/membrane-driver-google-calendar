@@ -14,7 +14,7 @@
     "types": [
       {
         "name": "Root",
-        "description": "Manage Google Calendar events and reminders.",
+        "description": "Manages the integration with Google Calendar API.",
         "fields": [
           {
             "name": "calendars",
@@ -126,7 +126,7 @@
       },
       {
         "name": "Tests",
-        "description": "Test actions for Google Calendar integration.",
+        "description": "Contains tests for the Google Calendar integration.",
         "fields": [],
         "actions": [
           {
@@ -186,7 +186,7 @@
             ]
           }
         ],
-        "description": "A collection of calendars."
+        "description": "Represents a collection of calendars."
       },
       {
         "name": "CalendarPage",
@@ -202,7 +202,7 @@
             "ofType": "CalendarPage"
           }
         ],
-        "description": "A page of calendars."
+        "description": "Represents a page of calendars."
       },
       {
         "name": "Calendar",
@@ -303,7 +303,7 @@
             ]
           }
         ],
-        "description": "A Google Calendar."
+        "description": "Represents a Google Calendar."
       },
       {
         "name": "CalendarList",
@@ -378,7 +378,7 @@
             "ofType": "Reminder"
           }
         ],
-        "description": "A list of Google Calendars."
+        "description": "Represents a collection of calendar lists."
       },
       {
         "name": "Reminder",
@@ -392,7 +392,7 @@
             "type": "Int"
           }
         ],
-        "description": "A reminder for an event."
+        "description": "Represents a reminder for an event."
       },
       {
         "name": "EventCollection",
@@ -496,7 +496,7 @@
         ],
         "actions": [],
         "events": [],
-        "description": "A collection of events."
+        "description": "Represents a collection of events."
       },
       {
         "name": "EventPage",
@@ -512,7 +512,7 @@
             "ofType": "EventPage"
           }
         ],
-        "description": "A page of events."
+        "description": "Represents a page of events."
       },
       {
         "name": "Event",
@@ -632,7 +632,7 @@
             ]
           }
         ],
-        "description": "A Google Calendar event."
+        "description": "Represents a Google Calendar event."
       },
       {
         "name": "Attendee",
@@ -678,7 +678,7 @@
             "type": "Int"
           }
         ],
-        "description": "An attendee of an event."
+        "description": "Represents an attendee of an event."
       },
       {
         "name": "EventInstanceCollection",
@@ -705,7 +705,7 @@
             ]
           }
         ],
-        "description": "A collection of event instances."
+        "description": "Represents a collection of event instances."
       },
       {
         "name": "EventInstancePage",
@@ -721,7 +721,7 @@
             "ofType": "EventInstancePage"
           }
         ],
-        "description": "A page of event instances."
+        "description": "Represents a page of event instances."
       },
       {
         "name": "EventInstance",
@@ -755,7 +755,7 @@
             "type": "EventInstanceCollection"
           }
         ],
-        "description": "A Google Calendar event instance."
+        "description": "Represents an instance of a Google Calendar event."
       },
       {
         "name": "EventTime",
@@ -775,7 +775,7 @@
         ],
         "actions": [],
         "events": [],
-        "description": "A time for an event."
+        "description": "Represents the time of an event."
       }
     ]
   }
