@@ -14,15 +14,17 @@
     "types": [
       {
         "name": "Root",
-        "description": "Connect to your Google Calendar and manage your events.",
+        "description": "Manage Google Calendar events and reminders.",
         "fields": [
           {
             "name": "calendars",
-            "type": "CalendarCollection"
+            "type": "CalendarCollection",
+            "description": "A collection of calendar resources available to the user."
           },
           {
             "name": "status",
-            "type": "String"
+            "type": "String",
+            "description": "The current status of the Google Calendar connection."
           },
           {
             "name": "parse",
@@ -43,19 +45,23 @@
                 "name": "value",
                 "type": "String"
               }
-            ]
+            ],
+            "description": "Parses the provided name and value into an Event object."
           },
           {
             "name": "authId",
-            "type": "String"
+            "type": "String",
+            "description": "The authorization identifier for the Google Calendar API."
           },
           {
             "name": "blob",
-            "type": "String"
+            "type": "String",
+            "description": "A blob of data associated with the Google Calendar connection."
           },
           {
             "name": "tests",
-            "type": "Tests"
+            "type": "Tests",
+            "description": "A collection of tests for the Google Calendar driver."
           }
         ],
         "actions": [
@@ -76,11 +82,13 @@
                 "type": "String",
                 "optional": true
               }
-            ]
+            ],
+            "description": "Configures the Google Calendar connection with the provided client credentials."
           },
           {
             "name": "checkStatus",
-            "type": "Boolean"
+            "type": "Boolean",
+            "description": "Checks the status of the Google Calendar connection and returns a boolean value."
           },
           {
             "name": "endpoint",
@@ -111,13 +119,14 @@
                 "name": "headers",
                 "type": "String"
               }
-            ]
+            ],
+            "description": "Handles HTTP requests sent to the Google Calendar driver."
           }
         ]
       },
       {
         "name": "Tests",
-        "description": "",
+        "description": "Test actions for Google Calendar integration.",
         "fields": [],
         "actions": [
           {
@@ -176,7 +185,8 @@
               }
             ]
           }
-        ]
+        ],
+        "description": "A collection of calendars."
       },
       {
         "name": "CalendarPage",
@@ -191,7 +201,8 @@
             "type": "Ref",
             "ofType": "CalendarPage"
           }
-        ]
+        ],
+        "description": "A page of calendars."
       },
       {
         "name": "Calendar",
@@ -291,7 +302,8 @@
               }
             ]
           }
-        ]
+        ],
+        "description": "A Google Calendar."
       },
       {
         "name": "CalendarList",
@@ -365,7 +377,8 @@
             "type": "List",
             "ofType": "Reminder"
           }
-        ]
+        ],
+        "description": "A list of Google Calendars."
       },
       {
         "name": "Reminder",
@@ -378,7 +391,8 @@
             "name": "minutes",
             "type": "Int"
           }
-        ]
+        ],
+        "description": "A reminder for an event."
       },
       {
         "name": "EventCollection",
@@ -481,7 +495,8 @@
           }
         ],
         "actions": [],
-        "events": []
+        "events": [],
+        "description": "A collection of events."
       },
       {
         "name": "EventPage",
@@ -496,7 +511,8 @@
             "type": "Ref",
             "ofType": "EventPage"
           }
-        ]
+        ],
+        "description": "A page of events."
       },
       {
         "name": "Event",
@@ -615,7 +631,8 @@
               }
             ]
           }
-        ]
+        ],
+        "description": "A Google Calendar event."
       },
       {
         "name": "Attendee",
@@ -660,7 +677,8 @@
             "name": "additionalGuests",
             "type": "Int"
           }
-        ]
+        ],
+        "description": "An attendee of an event."
       },
       {
         "name": "EventInstanceCollection",
@@ -686,7 +704,8 @@
               }
             ]
           }
-        ]
+        ],
+        "description": "A collection of event instances."
       },
       {
         "name": "EventInstancePage",
@@ -701,7 +720,8 @@
             "type": "Ref",
             "ofType": "EventInstancePage"
           }
-        ]
+        ],
+        "description": "A page of event instances."
       },
       {
         "name": "EventInstance",
@@ -734,7 +754,8 @@
             "name": "instances",
             "type": "EventInstanceCollection"
           }
-        ]
+        ],
+        "description": "A Google Calendar event instance."
       },
       {
         "name": "EventTime",
@@ -753,7 +774,8 @@
           }
         ],
         "actions": [],
-        "events": []
+        "events": [],
+        "description": "A time for an event."
       }
     ]
   }
