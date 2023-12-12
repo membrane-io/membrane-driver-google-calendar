@@ -310,72 +310,89 @@
         "fields": [
           {
             "name": "id",
-            "type": "String"
+            "type": "String",
+            "description": "The unique identifier for the calendar."
           },
           {
             "name": "kind",
-            "type": "String"
+            "type": "String",
+            "description": "The type of the resource."
           },
           {
             "name": "etag",
-            "type": "String"
+            "type": "String",
+            "description": "The ETag of the resource."
           },
           {
             "name": "summary",
-            "type": "String"
+            "type": "String",
+            "description": "The summary of the calendar list."
           },
           {
             "name": "description",
-            "type": "String"
+            "type": "String",
+            "description": "The description of the calendar list."
           },
           {
             "name": "location",
-            "type": "String"
+            "type": "String",
+            "description": "The location of the calendar list."
           },
           {
             "name": "timeZone",
-            "type": "String"
+            "type": "String",
+            "description": "The time zone of the calendar list."
           },
           {
             "name": "summaryOverride",
-            "type": "String"
+            "type": "String",
+            "description": "The summary override of the calendar list."
           },
           {
             "name": "colorId",
-            "type": "String"
+            "type": "String",
+            "description": "The color identifier of the calendar list."
           },
           {
             "name": "backgroundColor",
-            "type": "String"
+            "type": "String",
+            "description": "The background color of the calendar list."
           },
           {
             "name": "foregroundColor",
-            "type": "String"
+            "type": "String",
+            "description": "The foreground color of the calendar list."
           },
           {
             "name": "hidden",
-            "type": "Boolean"
+            "type": "Boolean",
+            "description": "Indicates if the calendar list is hidden."
           },
           {
             "name": "selected",
-            "type": "Boolean"
+            "type": "Boolean",
+            "description": "Indicates if the calendar list is selected."
           },
           {
             "name": "primary",
-            "type": "Boolean"
+            "type": "Boolean",
+            "description": "Indicates if the calendar list is the primary calendar."
           },
           {
             "name": "deleted",
-            "type": "Boolean"
+            "type": "Boolean",
+            "description": "Indicates if the calendar list is deleted."
           },
           {
             "name": "accessRole",
-            "type": "String"
+            "type": "String",
+            "description": "The access role of the calendar list."
           },
           {
             "name": "defaultReminders",
             "type": "List",
-            "ofType": "Reminder"
+            "ofType": "Reminder",
+            "description": "The default reminders for the calendar list."
           }
         ],
         "description": "Represents a collection of calendar lists."
