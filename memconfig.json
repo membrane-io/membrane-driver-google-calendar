@@ -420,9 +420,11 @@
             "params": [
               {
                 "name": "id",
-                "type": "String"
+                "type": "String",
+                "description": "The ID of the event."
               }
-            ]
+            ],
+            "description": "Represents a single event."
           },
           {
             "name": "page",
@@ -431,7 +433,8 @@
               {
                 "name": "calendar",
                 "type": "String",
-                "optional": true
+                "optional": true,
+                "description": "The calendar to retrieve events from."
               },
               {
                 "name": "alwaysIncludeEmail",
@@ -508,12 +511,13 @@
                 "type": "String",
                 "optional": true
               }
-            ]
+            ],
+            "description": "Represents a page of events."
           }
         ],
         "actions": [],
         "events": [],
-        "description": "Represents a collection of events."
+        "description": "Collection of Google Calendar events"
       },
       {
         "name": "EventPage",
@@ -601,40 +605,48 @@
         "fields": [
           {
             "name": "id",
-            "type": "String"
+            "type": "String",
+            "description": "Unique identifier of the event"
           },
           {
             "name": "summary",
             "type": "String",
             "hints": {
               "primary": true
-            }
+            },
+            "description": "Summary of the event"
           },
           {
             "name": "description",
-            "type": "String"
+            "type": "String",
+            "description": "Description of the event (HTML)"
           },
           {
             "name": "end",
-            "type": "EventTime"
+            "type": "EventTime",
+            "description": "End time of the event"
           },
           {
             "name": "start",
-            "type": "EventTime"
+            "type": "EventTime",
+            "description": "Start time of the event"
           },
           {
             "name": "recurrence",
             "type": "List",
-            "ofType": "String"
+            "ofType": "String",
+            "description": "List of recurrence rules for the event"
           },
           {
             "name": "attendees",
             "type": "List",
-            "ofType": "Attendee"
+            "ofType": "Attendee",
+            "description": "List of attendees for the event"
           },
           {
             "name": "instances",
-            "type": "EventInstanceCollection"
+            "type": "EventInstanceCollection",
+            "description": "Collection of event instances"
           }
         ],
         "events": [
@@ -646,7 +658,8 @@
                 "name": "secondsBefore",
                 "type": "Int"
               }
-            ]
+            ],
+            "description": "Notification event"
           }
         ],
         "description": "Represents a Google Calendar event."
