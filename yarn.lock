@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"client-oauth2@git+https://github.com/juancampa/js-client-oauth2.git":
+"client-oauth2@git+https://github.com/membrane-io/js-client-oauth2.git":
   version "4.3.3"
-  resolved "git+https://github.com/juancampa/js-client-oauth2.git#cd6c94cb2213f53631dedfc8b47c4ec1fb709e88"
+  resolved "git+https://github.com/membrane-io/js-client-oauth2.git#cd6c94cb2213f53631dedfc8b47c4ec1fb709e88"
   dependencies:
     safe-buffer "^5.2.0"
 
