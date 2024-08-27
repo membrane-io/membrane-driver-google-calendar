@@ -6,6 +6,6 @@
   "license": "MIT",
   "private": false,
   "dependencies": {
-    "client-oauth2": "git+https://github.com/membrane-io/js-client-oauth2.git"
+    "@badgateway/oauth2-client": "^2.4.1"
   }
 }

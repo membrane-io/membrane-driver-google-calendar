@@ -2,13 +2,7 @@
 # yarn lockfile v1
 
 
-"client-oauth2@git+https://github.com/membrane-io/js-client-oauth2.git":
-  version "4.3.3"
-  resolved "git+https://github.com/membrane-io/js-client-oauth2.git#cd6c94cb2213f53631dedfc8b47c4ec1fb709e88"
-  dependencies:
-    safe-buffer "^5.2.0"
-
-safe-buffer@^5.2.0:
-  version "5.2.1"
-  resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.2.1.tgz#1eaf9fa9bdb1fdd4ec75f58f9cdb4e6b7827eec6"
-  integrity sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==
+"@badgateway/oauth2-client@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@badgateway/oauth2-client/-/oauth2-client-2.4.1.tgz#31714aec98d48cd7d401211f2d0f328cd55fbe9f"
+  integrity sha512-s4W4WqJI1c3Xehr+szVtv/v+yLGwKaDG1Kz+3Fih3Y5nUlgJfnv7va72peERMEg6KDUGpK4Ksx8toqjN9ej80A==

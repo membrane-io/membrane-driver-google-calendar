@@ -1,4 +1,5 @@
-import ClientOAuth2 from "client-oauth2";
+import { OAuth2Client, generateCodeVerifier } from "@badgateway/oauth2-client";
+
 import { nodes, state, root } from "membrane";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -22,14 +23,17 @@ export async function api(
     method,
     url: `https://www.googleapis.com/calendar/v3/${path}${querystr}`,
     body,
+    headers: {},
   };
   if (state.accessToken) {
-    if (state.accessToken.expired()) {
+    if (await state.oauth2Client.isExpired(state.accessToken)) {
       console.log("Refreshing access token...");
-      state.accessToken = await state.accessToken.refresh();
+      state.accessToken = await state.oauth2Client.refreshToken(
+        state.accessToken
+      );
     }
-
-    req = state.accessToken.sign(req);
+    // Sign the request with the access token
+    req.headers["Authorization"] = `Bearer ${state.accessToken.accessToken}`;
   }
 
   return await fetch(req.url, { ...req, http: httpNode() });
@@ -85,15 +89,29 @@ export async function endpoint({ path, query, headers, body }) {
         return JSON.stringify({ status: 303, headers: { location: "/" } });
       }
       await createAuthClient();
-      const url = state.auth.code.getUri({
-        query: { access_type: "offline", prompt: "consent" }, // Request refresh token
-        // TODO: Use OAuth state
+      const codeVerifier = await generateCodeVerifier();
+      state.codeVerifier = codeVerifier;
+      const url = await state.oauth2Client.authorizationCode.getAuthorizeUri({
+        redirectUri: `${await endpointUrl()}/auth/callback`,
+        scope: [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events",
+        ],
+        codeVerifier,
       });
       return JSON.stringify({ status: 303, headers: { location: url } });
     }
     case "/auth/callback": {
-      state.accessToken = await state.auth.code.getToken(`${path}?${query}`);
-      if (state.accessToken?.accessToken) {
+      const token =
+        await state.oauth2Client.authorizationCode.getTokenFromCodeRedirect(
+          `${path}?${query}`,
+          {
+            redirectUri: `${await endpointUrl()}/auth/callback`,
+            codeVerifier: state.codeVerifier,
+          }
+        );
+      state.accessToken = token;
+      if (token.accessToken) {
         return html(`Driver configured!`);
       }
       return html(
@@ -160,20 +178,13 @@ function indexHtml(membraneAuthUrl: string, customAuthUrl: string) {
 export async function createAuthClient() {
   const { clientId, clientSecret } = state;
   if (clientId && clientSecret) {
-    state.auth = new ClientOAuth2(
-      {
-        clientId,
-        clientSecret,
-        accessTokenUri: "https://oauth2.googleapis.com/token",
-        authorizationUri: "https://accounts.google.com/o/oauth2/v2/auth",
-        redirectUri: `${state.endpointUrl}/auth/callback`,
-        scopes: [
-          "https://www.googleapis.com/auth/calendar.readonly",
-          "https://www.googleapis.com/auth/calendar.events",
-        ],
-      },
-      oauthRequest
-    );
+    state.oauth2Client = new OAuth2Client({
+      clientId,
+      clientSecret,
+      server: "https://accounts.google.com",
+      tokenEndpoint: "https://oauth2.googleapis.com/token",
+      authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+    });
   }
 }
 
@@ -183,20 +194,4 @@ export async function endpointUrl() {
     state.endpointUrl = await nodes.process.endpointUrl.$get();
   }
   return state.endpointUrl;
-}
-
-async function oauthRequest(
-  method: string,
-  url: string,
-  reqBody: string,
-  headers: any
-) {
-  const res = await fetch(url, {
-    body: reqBody.toString(),
-    headers,
-    method: method as RequestMethod,
-  });
-  const status = res.status;
-  const body = await res.text();
-  return { status, body };
 }

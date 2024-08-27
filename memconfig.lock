@@ -21,19 +21,19 @@
                 "params": [
                   {
                     "name": "url",
-                    "description": "",
+                    "description": "The URL to send the POST request to",
                     "type": "String",
                     "optional": false
                   },
                   {
                     "name": "headers",
-                    "description": "",
+                    "description": "Optional headers for the POST request",
                     "type": "String",
                     "optional": true
                   },
                   {
                     "name": "body",
-                    "description": "",
+                    "description": "The body of the POST request",
                     "type": "String",
                     "optional": true
                   }
@@ -47,19 +47,19 @@
                 "params": [
                   {
                     "name": "url",
-                    "description": "",
+                    "description": "The URL to send the PUT request to",
                     "type": "String",
                     "optional": false
                   },
                   {
                     "name": "headers",
-                    "description": "",
+                    "description": "Optional headers for the PUT request",
                     "type": "String",
                     "optional": true
                   },
                   {
                     "name": "body",
-                    "description": "",
+                    "description": "The body of the PUT request",
                     "type": "String",
                     "optional": true
                   }
@@ -73,19 +73,19 @@
                 "params": [
                   {
                     "name": "url",
-                    "description": "",
+                    "description": "The URL to send the PATCH request to",
                     "type": "String",
                     "optional": false
                   },
                   {
                     "name": "headers",
-                    "description": "",
+                    "description": "Optional headers for the PATCH request",
                     "type": "String",
                     "optional": true
                   },
                   {
                     "name": "body",
-                    "description": "",
+                    "description": "The body of the PATCH request",
                     "type": "String",
                     "optional": true
                   }
@@ -99,19 +99,19 @@
                 "params": [
                   {
                     "name": "url",
-                    "description": "",
+                    "description": "The URL to send the DELETE request to",
                     "type": "String",
                     "optional": false
                   },
                   {
                     "name": "headers",
-                    "description": "",
+                    "description": "Optional headers for the DELETE request",
                     "type": "String",
                     "optional": true
                   },
                   {
                     "name": "body",
-                    "description": "",
+                    "description": "The body of the DELETE request",
                     "type": "String",
                     "optional": true
                   }
@@ -120,7 +120,7 @@
               },
               {
                 "name": "endpoint",
-                "description": "The endpoint action",
+                "description": "Invoked when an HTTP request is received for this program",
                 "type": "String",
                 "params": [
                   {
@@ -136,6 +136,12 @@
                     "optional": false
                   },
                   {
+                    "name": "body",
+                    "description": "HTTP body, if any",
+                    "type": "String",
+                    "optional": true
+                  },
+                  {
                     "name": "query",
                     "description": "HTTP query string, encoded as JSON",
                     "type": "String",
@@ -146,11 +152,81 @@
                     "description": "HTTP headers, encoded as JSON",
                     "type": "String",
                     "optional": false
+                  }
+                ],
+                "hints": {
+                  "hidden": true
+                }
+              },
+              {
+                "name": "email",
+                "description": "Invoked when a new email arrives for this program",
+                "type": "String",
+                "params": [
+                  {
+                    "name": "replyTo",
+                    "description": "Reply to",
+                    "type": "String",
+                    "optional": true
                   },
                   {
-                    "name": "body",
-                    "description": "HTTP body, if any",
+                    "name": "text",
+                    "description": "Email body as text",
                     "type": "String",
+                    "optional": false
+                  },
+                  {
+                    "name": "from",
+                    "description": "Email sender",
+                    "type": "String",
+                    "optional": false
+                  },
+                  {
+                    "name": "to",
+                    "description": "To",
+                    "type": "String",
+                    "optional": false
+                  },
+                  {
+                    "name": "cc",
+                    "description": "CC",
+                    "type": "String",
+                    "optional": true
+                  },
+                  {
+                    "name": "subject",
+                    "description": "Email subject",
+                    "type": "String",
+                    "optional": false
+                  },
+                  {
+                    "name": "html",
+                    "description": "Email body as HTML",
+                    "type": "String",
+                    "optional": false
+                  },
+                  {
+                    "name": "id",
+                    "description": "Email ID",
+                    "type": "String",
+                    "optional": false
+                  },
+                  {
+                    "name": "inReplyTo",
+                    "description": "ID of email this is a reply to, if any",
+                    "type": "String",
+                    "optional": true
+                  },
+                  {
+                    "name": "replyText",
+                    "description": "Reply text",
+                    "type": "String",
+                    "optional": true
+                  },
+                  {
+                    "name": "attachments",
+                    "description": "An array of attachment names and download URLs",
+                    "type": "Json",
                     "optional": true
                   }
                 ],
@@ -161,26 +237,19 @@
             ],
             "fields": [
               {
-                "name": "status",
-                "description": "",
-                "type": "String",
-                "params": [],
-                "hints": {}
-              },
-              {
                 "name": "get",
                 "description": "A resource obtained via a GET request",
                 "type": "Resource",
                 "params": [
                   {
                     "name": "url",
-                    "description": "",
+                    "description": "The URL of the resource to retrieve",
                     "type": "String",
                     "optional": false
                   },
                   {
                     "name": "headers",
-                    "description": "",
+                    "description": "Optional headers for the GET request",
                     "type": "String",
                     "optional": true
                   }
@@ -436,13 +505,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -462,13 +531,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -488,13 +557,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -514,13 +583,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -542,7 +611,7 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -554,13 +623,13 @@
                       "params": [
                         {
                           "name": "api",
-                          "description": "",
+                          "description": "The API to use. Check https://www.membrane.io/docs for a list of APIs that support this",
                           "type": "String",
                           "optional": false
                         },
                         {
                           "name": "authId",
-                          "description": "",
+                          "description": "An arbitrary gref that uniquely identifies this program.",
                           "type": "Ref",
                           "ofType": "String",
                           "optional": false
@@ -626,13 +695,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -652,13 +721,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -678,13 +747,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -704,13 +773,13 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         },
                         {
                           "name": "body",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
@@ -732,7 +801,7 @@
                           "name": "headers",
                           "description": "",
                           "type": "String",
-                          "optional": false
+                          "optional": true
                         }
                       ],
                       "hints": {}
